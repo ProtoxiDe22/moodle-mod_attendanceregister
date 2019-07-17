@@ -203,3 +203,27 @@ $string['crontask']='Recalculate attendanceregister sessions';
 // Alerts
 $string['standardlog_disabled'] = 'Moodle Standard Log is disabled. All new users session are not tracked';
 $string['standardlog_readonly'] = 'Moodle Standard Log is readonly. All new users session are not tracked'; 
+
+// Privacy
+$string['privacy:metadata:attendanceregister_aggregate'] = 'Keeps track of the sessions aggregated per user';
+$string['privacy:metadata:attendanceregister_aggregate:userid'] = 'The userid';
+$string['privacy:metadata:attendanceregister_aggregate:duration'] = 'The session\'s duration';
+$string['privacy:metadata:attendanceregister_aggregate:onlinesess'] = 'Whether the session is online or offline';
+$string['privacy:metadata:attendanceregister_aggregate:total'] = 'Total session time';
+$string['privacy:metadata:attendanceregister_aggregate:grandtotal'] = 'Grand total time';
+$string['privacy:metadata:attendanceregister_aggregate:refcourse'] = 'The course which an offline session is referred to';
+$string['privacy:metadata:attendanceregister_aggregate:lastsessionlogout'] = 'Last user online session logout, taken from attendanceregister_session logout';
+
+$string['privacy:metadata:attendanceregister_lock'] = 'Locks on user\'s attendance register during recalculation';
+$string['privacy:metadata:attendanceregister_lock:userid'] = 'In order to recalculate the user\'s register, we store the session\'s userid. This data is temporary and is deleted after the session recalculation is completed';
+
+$string['privacy:metadata:attendanceregister_session'] = 'Keeps track of the user\'s sessions';
+$string['privacy:metadata:attendanceregister_session:login'] = 'The login timestamp';
+$string['privacy:metadata:attendanceregister_session:logout'] = 'The logout timestamp';
+$string['privacy:metadata:attendanceregister_session:duration'] = 'The session duration';
+$string['privacy:metadata:attendanceregister_session:userid'] = 'The userid';
+$string['privacy:metadata:attendanceregister_session:onlinesess'] = 'Whether the session is online or offline';
+$string['privacy:metadata:attendanceregister_session:refcourse'] = 'The course which an offline session is referred to';
+$string['privacy:metadata:attendanceregister_session:comments'] = 'Offline sessions\' comments';
+$string['privacy:metadata:attendanceregister_session:addedbyuserid'] = 'If the offline session is inserted by another user, this is the related userid';
+
