@@ -226,4 +226,5 @@ $string['privacy:metadata:attendanceregister_session:onlinesess'] = 'Whether the
 $string['privacy:metadata:attendanceregister_session:refcourse'] = 'The course which an offline session is referred to';
 $string['privacy:metadata:attendanceregister_session:comments'] = 'Offline sessions\' comments';
 $string['privacy:metadata:attendanceregister_session:addedbyuserid'] = 'If the offline session is inserted by another user, this is the related userid';
+$string['privacy:metadata:attendanceregister_session:useridIndex'] = '';
 
