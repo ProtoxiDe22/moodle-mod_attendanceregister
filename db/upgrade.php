@@ -85,6 +85,28 @@ function xmldb_attendanceregister_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2013040605, 'attendanceregister');
     }
     
+    if ( $oldversion < 2020071601 ) {
+        $table = new xmldb_table('attendanceregister_session');
+        $index = new xmldb_index('onlinesess', XMLDB_INDEX_NOTUNIQUE, array('onlinesess'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+         
+        $table = new xmldb_table('attendanceregister_aggregate');
+        $index = new xmldb_index('grandtotal', XMLDB_INDEX_NOTUNIQUE, array('grandtotal'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+         
+        $table = new xmldb_table('attendanceregister_aggregate');
+        $index = new xmldb_index('lastsessionlogout', XMLDB_INDEX_NOTUNIQUE, array('lastsessionlogout'));
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+         
+        upgrade_mod_savepoint(true, 2020071601, 'attendanceregister');
+    }
+    
     return true;
 }
 

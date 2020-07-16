@@ -46,6 +46,9 @@
         <KEY NAME="attendanceregister" TYPE="foreign" FIELDS="register" REFTABLE="attendanceregister" REFFIELDS="id" PREVIOUS="primary" NEXT="user"/>
         <KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" PREVIOUS="attendanceregister"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="onlinesess" UNIQUE="false" FIELDS="onlinesess"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="attendanceregister_aggregate" COMMENT="Session's aggregated per User" PREVIOUS="attendanceregister_session" NEXT="attendanceregister_lock">
       <FIELDS>
@@ -64,6 +67,10 @@
         <KEY NAME="attendanceregister" TYPE="foreign" FIELDS="register" REFTABLE="attendanceregister" REFFIELDS="id" PREVIOUS="primary" NEXT="user"/>
         <KEY NAME="user" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" PREVIOUS="attendanceregister"/>
       </KEYS>
+      <INDEXES>
+        <INDEX NAME="grandtotal" UNIQUE="false" FIELDS="grandtotal"/>
+        <INDEX NAME="lastsessionlogout" UNIQUE="false" FIELDS="lastsessionlogout"/>
+      </INDEXES>
     </TABLE>
     <TABLE NAME="attendanceregister_lock" COMMENT="Locks on User's Attendance Register during recalculation" PREVIOUS="attendanceregister_aggregate">
       <FIELDS>

@@ -13,12 +13,9 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-$plugin->version  = 2017112201;
+$plugin->version  = 2020071601;
 $plugin->requires = 2014051200;  // Requires this Moodle version
 //$plugin->cron     = 300;
 $plugin->component = 'mod_attendanceregister'; // Full name of the plugin (used for diagnostics)
 $plugin->maturity  = MATURITY_STABLE;
-$plugin->release   = "2017.11.22.01"; // User-friendly version number
-
-
-
+$plugin->release   = "2020.07.16.01 cineca build: 2020071601"; // User-friendly version number
