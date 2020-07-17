@@ -227,4 +227,6 @@ $string['privacy:metadata:attendanceregister_session:refcourse'] = 'The course w
 $string['privacy:metadata:attendanceregister_session:comments'] = 'Offline sessions\' comments';
 $string['privacy:metadata:attendanceregister_session:addedbyuserid'] = 'If the offline session is inserted by another user, this is the related userid';
 $string['privacy:metadata:attendanceregister_session:useridIndex'] = '';
+$string['myattendanceregistersessions'] = 'My attendance register sessions';
+$string['myattendanceregisteraggregates'] = 'My attendance register aggregates values';
 
