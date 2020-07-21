@@ -6,14 +6,12 @@ use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\contextlist;
 use core_privacy\local\request\userlist;
 
-use core_privacy\local\request\transform;      // QUESTI DOVREBBERO ESSERE INUTILI
-use core_privacy\local\request\deletion_criteria;      // QUESTI DOVREBBERO ESSERE INUTILI
-use core_privacy\local\request\helper; // QUESTI DOVREBBERO ESSERE INUTILI
-use core_privacy\local\request\writer; // QUESTI DOVREBBERO ESSERE INUTILI
-
+use core_privacy\local\request\transform;	// QUESTI DOVREBBERO ESSERE INUTILI
+use core_privacy\local\request\deletion_criteria;	// QUESTI DOVREBBERO ESSERE INUTILI
+use core_privacy\local\request\helper;	// QUESTI DOVREBBERO ESSERE INUTILI
+use core_privacy\local\request\writer;	// QUESTI DOVREBBERO ESSERE INUTILI
 
 defined('MOODLE_INTERNAL') || die();
-
 
 class provider implements
     \core_privacy\local\metadata\provider,
@@ -21,8 +19,6 @@ class provider implements
     \core_privacy\local\request\plugin\provider  {
 
     public static function get_metadata(collection $items) : collection {
-var_dump("get_metadata");
-
 		$items->add_database_table(
 			'attendanceregister_aggregate',
 			 [
@@ -48,11 +44,10 @@ var_dump("get_metadata");
 		$items->add_database_table(
 			'attendanceregister_session',
 			 [
-				'userid' => 'privacy:metadata:attendanceregister_session:userid',
 				'login' => 'privacy:metadata:attendanceregister_session:login',
 				'logout' => 'privacy:metadata:attendanceregister_session:logout',
 				'duration' => 'privacy:metadata:attendanceregister_session:duration',
-				'useridIndex' => 'privacy:metadata:attendanceregister_session:useridIndex',
+				'userid' => 'privacy:metadata:attendanceregister_session:userid',
 				'onlinesess' => 'privacy:metadata:attendanceregister_session:onlinesess',
 				'refcourse' => 'privacy:metadata:attendanceregister_session:refcourse',
 				'comments' => 'privacy:metadata:attendanceregister_session:comments',
@@ -64,9 +59,7 @@ var_dump("get_metadata");
         return $items;
     }
 
-
     public static function get_contexts_for_userid(int $userid) : contextlist {
-var_dump("get_contexts_for_userid");
         $contextlist = new \core_privacy\local\request\contextlist();
 
         $params = [
@@ -74,7 +67,6 @@ var_dump("get_contexts_for_userid");
             'contextlevel'      => CONTEXT_MODULE,
             'registeruserid'    => $userid,
         ];
-
 
         $sql = "SELECT c.id
                  FROM {context} c
@@ -87,18 +79,13 @@ var_dump("get_contexts_for_userid");
                 )
         ";
 
- 
         $contextlist->add_from_sql($sql, $params);		// INUTILE CERCARE ANCHE NELLA mdl_attendanceregister_session OLTRE CHE NELLA mdl_attendanceregister_aggregate, NO? I CONTESTI A CUI RIFERISCONO SONO GLI STESSI, NO?
-var_dump($userid);
-var_dump($contextlist);
-// die;
         return $contextlist;
 
 
     }
 
     public static function export_user_data(approved_contextlist $contextlist) {
-var_dump("export_user_data");
         global $DB;
 
         $contexts = array_reduce($contextlist->get_contexts(), function($carry, $context) {
@@ -127,7 +114,9 @@ var_dump("export_user_data");
         $sql = "SELECT
                     c.id AS contextid,
                     agg.duration AS duration,
+                    agg.refcourse AS refcourse,
                     agg.onlinesess AS onlinesess,
+                    agg.lastsessionlogout AS lastsessionlogout,
                     agg.total AS total,
                     agg.grandtotal AS grandtotal
                   FROM {context} c
@@ -146,7 +135,9 @@ var_dump("export_user_data");
         foreach ($aggregates as $aiccsession) {
             $alldata[$aiccsession->contextid][] = (object)[
                     'duration' => $aiccsession->duration,
+                    'refcourse' => $aiccsession->refcourse,
                     'onlinesess' => $aiccsession->onlinesess,
+                    'lastsessionlogout' => $aiccsession->lastsessionlogout,
                     'total' => $aiccsession->total,
                     'grandtotal' => $aiccsession->grandtotal,
                 ];
@@ -171,6 +162,8 @@ var_dump("export_user_data");
                     c.id AS contextid,
                     sess.duration AS duration,
                     sess.onlinesess AS onlinesess,
+                    sess.login AS login,
+                    sess.logout AS logout,
                     sess.refcourse AS refcourse,
                     sess.comments AS comments,
                     sess.addedbyuserid AS addedbyuserid
@@ -190,6 +183,8 @@ var_dump("export_user_data");
             $alldata[$aiccsession->contextid][] = (object)[
                     'duration' => $aiccsession->duration,
                     'onlinesess' => $aiccsession->onlinesess,
+                    'login' => $aiccsession->login,
+                    'logout' => $aiccsession->logout,
                     'refcourse' => $aiccsession->refcourse,
                     'comments' => $aiccsession->comments,
                     'addedbyuserid' => $aiccsession->addedbyuserid
@@ -212,19 +207,131 @@ var_dump("export_user_data");
     }
 
     public static function delete_data_for_all_users_in_context(\context $context) {
-var_dump("delete_data_for_all_users_in_context");
+        // This should not happen, but just in case.
+        if ($context->contextlevel != CONTEXT_MODULE) {
+            return;
+        }
+
+        // Prepare SQL to gather all IDs to delete.
+        $sql = "SELECT ss.id
+                  FROM {%s} ss
+                  JOIN {modules} m
+                    ON m.name = 'attendanceregister'
+                  JOIN {course_modules} cm
+                    ON cm.instance = ss.register
+                   AND cm.module = m.id
+                 WHERE cm.id = :cmid";
+        $params = ['cmid' => $context->instanceid];
+
+        static::delete_data('attendanceregister_aggregate', $sql, $params);
+        static::delete_data('attendanceregister_session', $sql, $params);
     }
 
     public static function delete_data_for_users(approved_userlist $userlist) {
-var_dump("delete_data_for_users");
+        global $DB;
+        $context = $userlist->get_context();
+
+        if (!is_a($context, \context_module::class)) {
+            return;
+        }
+
+        // Prepare SQL to gather all completed IDs.
+        $userids = $userlist->get_userids();
+        list($insql, $inparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+
+        $sql = "SELECT ss.id
+                  FROM {%s} ss
+                  JOIN {modules} m
+                    ON m.name = 'attendanceregister'
+                  JOIN {course_modules} cm
+                    ON cm.instance = ss.register
+                   AND cm.module = m.id
+                  JOIN {context} ctx
+                    ON ctx.instanceid = cm.id
+                 WHERE ctx.id = :contextid
+                   AND ss.userid $insql";
+        $params = array_merge($inparams, ['contextid' => $context->id]);
+
+        static::delete_data('attendanceregister_aggregate', $sql, $params);
+        static::delete_data('attendanceregister_session', $sql, $params);
     }
 
     public static function get_users_in_context(userlist $userlist) {
-var_dump("get_users_in_context");
+        $context = $userlist->get_context();
+
+        if (!is_a($context, \context_module::class)) {
+            return;
+        }
+
+        $sql = "SELECT ss.userid
+                  FROM {%s} ss
+                  JOIN {modules} m
+                    ON m.name = 'attendanceregister'
+                  JOIN {course_modules} cm
+                    ON cm.instance = ss.register
+                   AND cm.module = m.id
+                  JOIN {context} ctx
+                    ON ctx.instanceid = cm.id
+                   AND ctx.contextlevel = :modlevel
+                 WHERE ctx.id = :contextid";
+
+        $params = ['modlevel' => CONTEXT_MODULE, 'contextid' => $context->id];
+
+        $userlist->add_from_sql('userid', sprintf($sql, 'attendanceregister_aggregate'), $params);
+        $userlist->add_from_sql('userid', sprintf($sql, 'attendanceregister_session'), $params);
     }
 
     public static function delete_data_for_user(approved_contextlist $contextlist) {
-var_dump("delete_data_for_user");
+        global $DB;
+
+        // Remove contexts different from COURSE_MODULE.
+        $contextids = array_reduce($contextlist->get_contexts(), function($carry, $context) {
+            if ($context->contextlevel == CONTEXT_MODULE) {
+                $carry[] = $context->id;
+            }
+            return $carry;
+        }, []);
+
+        if (empty($contextids)) {
+            return;
+        }
+        $userid = $contextlist->get_user()->id;
+        // Prepare SQL to gather all completed IDs.
+        list($insql, $inparams) = $DB->get_in_or_equal($contextids, SQL_PARAMS_NAMED);
+
+        $sql = "SELECT a.id
+                  FROM {%s} a
+                  JOIN {modules} m
+                    ON m.name = 'attendanceregister'
+                  JOIN {course_modules} cm
+                    ON cm.instance = a.register
+                   AND cm.module = m.id
+                  JOIN {context} ctx
+                    ON ctx.instanceid = cm.id
+                 WHERE a.userid = :userid
+                   AND ctx.id $insql";
+        $params = array_merge($inparams, ['userid' => $userid]);
+
+		// key "register" is in both attendanceregister_aggregate and attendanceregister_session, so the query remains the same
+        static::delete_data('attendanceregister_aggregate', $sql, $params);		
+        static::delete_data('attendanceregister_session', $sql, $params);
+    }
+
+    /**
+     * Delete data from $tablename with the IDs returned by $sql query.
+     *
+     * @param  string $tablename  Table name where executing the SQL query.
+     * @param  string $sql    SQL query for getting the IDs of the scoestrack entries to delete.
+     * @param  array  $params SQL params for the query.
+     */
+    protected static function delete_data(string $tablename, string $sql, array $params) {
+        global $DB;
+
+        $scoestracksids = $DB->get_fieldset_sql(sprintf($sql, $tablename), $params);
+        if (!empty($scoestracksids)) {
+            list($insql, $inparams) = $DB->get_in_or_equal($scoestracksids, SQL_PARAMS_NAMED);
+            $DB->delete_records_select($tablename, "id $insql", $inparams);
+        }
     }
 
 }
