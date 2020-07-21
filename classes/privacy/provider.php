@@ -1,29 +1,16 @@
 <?php
-
-/*
-namespace mod_attendanceregister\privacy;
- 
-class provider implements
-    // This plugin does not store any personal user data.
-    \core_privacy\local\metadata\null_provider {
-     public static function get_reason() : string {
-        return 'privacy:metadata';
-    }
-}
-*/
-
-
-
 namespace mod_attendanceregister\privacy;
 use core_privacy\local\metadata\collection;
-use core_privacy\local\request\transform;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\contextlist;
-use core_privacy\local\request\deletion_criteria;
-use core_privacy\local\request\helper;
 use core_privacy\local\request\userlist;
-use core_privacy\local\request\writer;
+
+use core_privacy\local\request\transform;      // QUESTI DOVREBBERO ESSERE INUTILI
+use core_privacy\local\request\deletion_criteria;      // QUESTI DOVREBBERO ESSERE INUTILI
+use core_privacy\local\request\helper; // QUESTI DOVREBBERO ESSERE INUTILI
+use core_privacy\local\request\writer; // QUESTI DOVREBBERO ESSERE INUTILI
+
 
 defined('MOODLE_INTERNAL') || die();
 
