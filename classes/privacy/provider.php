@@ -5,11 +5,8 @@ use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\approved_userlist;
 use core_privacy\local\request\contextlist;
 use core_privacy\local\request\userlist;
-
-use core_privacy\local\request\transform;	// QUESTI DOVREBBERO ESSERE INUTILI
-use core_privacy\local\request\deletion_criteria;	// QUESTI DOVREBBERO ESSERE INUTILI
-use core_privacy\local\request\helper;	// QUESTI DOVREBBERO ESSERE INUTILI
-use core_privacy\local\request\writer;	// QUESTI DOVREBBERO ESSERE INUTILI
+use core_privacy\local\request\helper;
+use core_privacy\local\request\writer;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -79,10 +76,8 @@ class provider implements
                 )
         ";
 
-        $contextlist->add_from_sql($sql, $params);		// INUTILE CERCARE ANCHE NELLA mdl_attendanceregister_session OLTRE CHE NELLA mdl_attendanceregister_aggregate, NO? I CONTESTI A CUI RIFERISCONO SONO GLI STESSI, NO?
+        $contextlist->add_from_sql($sql, $params);		// INUTILE CERCARE ANCHE NELLA mdl_attendanceregister_session OLTRE CHE NELLA mdl_attendanceregister_aggregate, I CONTESTI A CUI RIFERISCONO SONO GLI STESSI
         return $contextlist;
-
-
     }
 
     public static function export_user_data(approved_contextlist $contextlist) {
@@ -132,20 +127,18 @@ class provider implements
 
         $alldata = [];
         $aggregates = $DB->get_recordset_sql($sql, $params);
-        foreach ($aggregates as $aiccsession) {
-            $alldata[$aiccsession->contextid][] = (object)[
-                    'duration' => $aiccsession->duration,
-                    'refcourse' => $aiccsession->refcourse,
-                    'onlinesess' => $aiccsession->onlinesess,
-                    'lastsessionlogout' => $aiccsession->lastsessionlogout,
-                    'total' => $aiccsession->total,
-                    'grandtotal' => $aiccsession->grandtotal,
+        foreach ($aggregates as $aggregate) {
+            $alldata[$aggregate->contextid][] = (object)[
+                    'duration' => $aggregate->duration,
+                    'refcourse' => $aggregate->refcourse,
+                    'onlinesess' => $aggregate->onlinesess,
+                    'lastsessionlogout' => $aggregate->lastsessionlogout,
+                    'total' => $aggregate->total,
+                    'grandtotal' => $aggregate->grandtotal,
                 ];
         }
         $aggregates->close();
 
-        // The aicc_session data is organised in: {Course name}/{SCORM activity name}/{My AICC sessions}/data.json
-        // In this case, the attempt hasn't been included in the json file because it can be null.
         array_walk($alldata, function($data, $contextid) {
             $context = \context::instance_by_id($contextid);
             $subcontext = [
@@ -179,21 +172,19 @@ class provider implements
 
         $alldata = [];
         $aggregates = $DB->get_recordset_sql($sql, $params);
-        foreach ($aggregates as $aiccsession) {
-            $alldata[$aiccsession->contextid][] = (object)[
-                    'duration' => $aiccsession->duration,
-                    'onlinesess' => $aiccsession->onlinesess,
-                    'login' => $aiccsession->login,
-                    'logout' => $aiccsession->logout,
-                    'refcourse' => $aiccsession->refcourse,
-                    'comments' => $aiccsession->comments,
-                    'addedbyuserid' => $aiccsession->addedbyuserid
+        foreach ($aggregates as $aggregate) {
+            $alldata[$aggregate->contextid][] = (object)[
+                    'duration' => $aggregate->duration,
+                    'onlinesess' => $aggregate->onlinesess,
+                    'login' => $aggregate->login,
+                    'logout' => $aggregate->logout,
+                    'refcourse' => $aggregate->refcourse,
+                    'comments' => $aggregate->comments,
+                    'addedbyuserid' => $aggregate->addedbyuserid
                 ];
         }
         $aggregates->close();
 
-        // The aicc_session data is organised in: {Course name}/{SCORM activity name}/{My AICC sessions}/data.json
-        // In this case, the attempt hasn't been included in the json file because it can be null.
         array_walk($alldata, function($data, $contextid) {
             $context = \context::instance_by_id($contextid);
             $subcontext = [
