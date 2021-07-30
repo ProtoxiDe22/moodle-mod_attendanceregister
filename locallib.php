@@ -758,6 +758,24 @@ function attendanceregister__formatDateTime($dateTime) {
 
 }
 
+function attendanceregister__formatDateTime_noTime($dateTime) {
+    global $CFG;
+
+    // If Timestamp = 0 or null return "Never"
+    if ( !$dateTime ) {
+        return get_string('never', 'attendanceregister');
+    }
+
+
+    if ( $CFG->debugdisplay && $CFG->debug >= DEBUG_DEVELOPER ) {
+        return userdate($dateTime) . ' ['. $dateTime . ']';
+    } else if ( $CFG->debugdisplay && $CFG->debug >= DEBUG_ALL ) {
+        return '<a title="' . $dateTime . '">'. userdate($dateTime) .'</a>';
+    }
+    return userdate($dateTime, get_string('strftimedaydate', 'core_langconfig'));
+
+}
+
 /**
  * A shortcut for loading a User
  * It the User does not exist, an error is thrown

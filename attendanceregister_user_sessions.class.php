@@ -58,7 +58,7 @@ class attendanceregister_user_sessions {
      */
     public function __construct($register, $userId, attendanceregister_user_capablities $userCapabilities) {
         $this->register = $register;
-        $this->userSessions = attendanceregister_get_user_sessions($register, $userId);
+        $this->userSessions = attendanceregister_get_user_daily_sessions($register, $userId);
         $this->userAggregates = new attendanceregister_user_aggregates($register, $userId, $this);
         $this->trackedCourses = new attendanceregister_tracked_courses($register);
         $this->userCapabilites = $userCapabilities;
@@ -70,6 +70,7 @@ class attendanceregister_user_sessions {
      */
     public function html_table() {
         global $OUTPUT, $doShowPrintableVersion;
+        debugging('html_table', DEBUG_DEVELOPER);
 
         $table = new html_table();
         $table->attributes['class'] .= ' attendanceregister_sessionlist table table-condensed table-bordered table-striped table-hover';
@@ -79,7 +80,6 @@ class attendanceregister_user_sessions {
         $table->head = array(
             get_string('count', 'attendanceregister'),
             get_string('start', 'attendanceregister'),
-            get_string('end', 'attendanceregister'),
             get_string('online_offline', 'attendanceregister')
         );
         $table->align = array('left', 'left', 'left', 'right');
@@ -118,10 +118,10 @@ class attendanceregister_user_sessions {
                 }
 
                 // Duration
-                $duration = attendanceregister_format_duration($session->duration);
+                $duration = attendanceregister_format_duration($session->totalduration);
 
                 // Basic columns
-                $tableRow = new html_table_row( array($rowcountStr, attendanceregister__formatDateTime($session->login), attendanceregister__formatDateTime($session->logout), $duration) );
+                $tableRow = new html_table_row( array($rowcountStr, attendanceregister__formatDateTime_noTime($session->login), $duration) );
 
                 // Add class for zebra stripes
                 $tableRow->attributes['class'] .= (  ($rowcount % 2)?' attendanceregister_oddrow':' attendanceregister_evenrow' );
