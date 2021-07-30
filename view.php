@@ -324,7 +324,6 @@ else if ($doShowContents) {
 
     //// Show User's Sessions
     if ($userId) {
-        debugging('userid', DEBUG_DEVELOPER);
         /// Button bar
 
         echo $OUTPUT->container_start('attendanceregister_buttonbar btn-group');

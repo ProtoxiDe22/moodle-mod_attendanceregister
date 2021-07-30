@@ -441,11 +441,11 @@ function attendanceregister_get_user_daily_sessions($register, $userId){
     global $DB;
     
     $query = "SELECT *, FROM_UNIXTIME(login, '%Y/%m/%d') as sessionday , sum(duration) as totalduration FROM {attendanceregister_session}
-    where userid = :userid AND register = :register     
+    where userid = ? AND register = ?     
     group by sessionday
     order by login DESC ";
 
-    $userSessions = $DB->get_records_sql($query, ['userid'=>$userId, 'register'=>$register]);
+    $userSessions = $DB->get_records_sql($query, [$userId, $register->id]);
     return $userSessions;
 }
 

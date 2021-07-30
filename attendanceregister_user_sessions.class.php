@@ -70,7 +70,6 @@ class attendanceregister_user_sessions {
      */
     public function html_table() {
         global $OUTPUT, $doShowPrintableVersion;
-        debugging('html_table', DEBUG_DEVELOPER);
 
         $table = new html_table();
         $table->attributes['class'] .= ' attendanceregister_sessionlist table table-condensed table-bordered table-striped table-hover';
