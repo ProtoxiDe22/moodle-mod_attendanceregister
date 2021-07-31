@@ -78,8 +78,8 @@ class attendanceregister_user_sessions {
 
         $table->head = array(
             get_string('count', 'attendanceregister'),
-            get_string('start', 'attendanceregister'),
-            get_string('online_offline', 'attendanceregister')
+            get_string('day', 'attendanceregister'),
+            get_string('attendance_duration', 'attendanceregister')
         );
         $table->align = array('left', 'left', 'left', 'right');
 
